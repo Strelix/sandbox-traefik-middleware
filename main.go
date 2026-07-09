@@ -41,8 +41,8 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 }
 
 func (m *ActivityTracker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	host := req.Host
-	key := fmt.Sprintf("sandbox:middleware:%s", host)
+	host, port := getHostPort(req)
+	key := fmt.Sprintf("sandbox:middleware:%s:%s", host, port)
 	val := fmt.Sprintf("%d", time.Now().Unix())
 
 	go func() {
@@ -65,10 +65,24 @@ func (m *ActivityTracker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		// Minimal Redis SET using RESP protocol: SET <key> <val> EX 3600
-		// *5\r\n$3\r\nSET\r\n$<len_key>\r\n<key>\r\n$<len_val>\r\n<val>\r\n$2\r\nEX\r\n$4\r\n3600\r\n
+		// Format: *5\r\n$3\r\nSET\r\n$<len_key>\r\n<key>\r\n$<len_val>\r\n<val>\r\n$2\r\nEX\r\n$4\r\n3600\r\n
 		cmd := fmt.Sprintf("*5\r\n$3\r\nSET\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$2\r\nEX\r\n$4\r\n3600\r\n", len(key), key, len(val), val)
 		_, _ = conn.Write([]byte(cmd))
 	}()
 
 	m.next.ServeHTTP(rw, req)
+}
+
+func getHostPort(req *http.Request) (string, string) {
+	host, port, err := net.SplitHostPort(req.Host)
+	if err != nil {
+		// If SplitHostPort fails, it likely means the port is missing
+		host = req.Host
+		if req.TLS != nil {
+			port = "443"
+		} else {
+			port = "80"
+		}
+	}
+	return host, port
 }
