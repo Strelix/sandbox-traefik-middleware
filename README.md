@@ -82,9 +82,9 @@ labels:
 
 ## Development
 
-A `dev/docker-compose.yml` is provided for local testing. It spins up Traefik and Redis and serves a basic nginx page.
+A `example/docker-compose.yml` is provided for local testing. It spins up Traefik and Redis and serves a basic nginx page.
 
 ```bash
-cd dev
+cd example
 docker-compose up
 ```
