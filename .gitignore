@@ -1,0 +1,9 @@
+*.so
+*.test
+*.out
+
+.idea/
+.vscode/
+
+# Traefik local plugin artifacts (if any)
+example/

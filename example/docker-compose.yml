@@ -1,0 +1,30 @@
+
+
+services:
+  hello:
+    image:  nginxdemos/hello
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hello.rule=Host(`nginx.localhost`)"
+      - "traefik.http.routers.hello.entrypoints=web"
+      - "traefik.http.routers.hello.middlewares=sandbox-traefik-middleware@docker"
+      - "traefik.http.middlewares.sandbox-traefik-middleware.plugin.sandbox-traefik-middleware.redisAddr=redis:6379"
+  redis:
+    image: redis:alpine
+    ports:
+      - "63799:6379"
+  traefik:
+    image: traefik:v3.7
+    ports:
+     - "1111:80"
+     - "1112:8080"
+
+    command:
+      - "--providers.docker=true"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+      - "--experimental.localPlugins.sandbox-traefik-middleware.moduleName=github.com/Strelix/sandbox-traefik-middleware"
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../:/plugins-local/src/github.com/Strelix/sandbox-traefik-middleware

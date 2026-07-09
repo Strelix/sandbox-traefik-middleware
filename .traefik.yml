@@ -1,0 +1,10 @@
+displayName: Strelix Traefik Middleware
+type: middleware
+
+import: github.com/Strelix/sandbox-traefik-middleware
+
+summary: A Traefik middleware plugin that logs request activity to Redis.
+
+testData:
+  redisAddr: "localhost:6379"
+  redisPassword: ""
