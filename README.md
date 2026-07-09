@@ -13,6 +13,7 @@ This is used for Strelix Sandboxes and is how the controller queries activity.
 | `redisAddr`     | `string` | The TCP address of the Redis server (e.g., `redis:6379`).             |
 | `redisPassword` | `string` | (Optional) Password for Redis authentication.                         |
 | `redisUser`     | `string` | (Optional) Username for Redis authentication (requires Redis 6+ ACL). |
+| `keyPrefix`     | `string` | (Optional) Custom Redis key prefix. Default: `sandbox:middleware:`.   |
 
 ## Installation
 
@@ -25,7 +26,7 @@ experimental:
   plugins:
     strelix-middleware:
       moduleName: "github.com/Strelix/sandbox-traefik-middleware"
-      version: "v0.0.1"
+      version: "v0.0.2"
 ```
 
 ### As a Local Plugin

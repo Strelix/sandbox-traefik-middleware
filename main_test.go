@@ -8,6 +8,44 @@ import (
 	"testing"
 )
 
+func TestNew(t *testing.T) {
+	testCases := []struct {
+		name           string
+		config         *Config
+		expectedPrefix string
+	}{
+		{
+			name: "Default prefix",
+			config: &Config{
+				RedisAddr: "localhost:6379",
+			},
+			expectedPrefix: "sandbox:middleware:",
+		},
+		{
+			name: "Custom prefix",
+			config: &Config{
+				RedisAddr: "localhost:6379",
+				KeyPrefix: "custom:prefix:",
+			},
+			expectedPrefix: "custom:prefix:",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			handler, err := New(context.Background(), nil, tc.config, "test")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			at := handler.(*ActivityTracker)
+			if at.keyPrefix != tc.expectedPrefix {
+				t.Errorf("expected prefix %s, got %s", tc.expectedPrefix, at.keyPrefix)
+			}
+		})
+	}
+}
+
 func TestServeHTTP(t *testing.T) {
 	cfg := CreateConfig()
 	cfg.RedisAddr = "localhost:6379"

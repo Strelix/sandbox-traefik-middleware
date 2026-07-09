@@ -12,6 +12,7 @@ type Config struct {
 	RedisAddr     string `json:"redisAddr,omitempty"`
 	RedisPassword string `json:"redisPassword,omitempty"`
 	RedisUser     string `json:"redisUser,omitempty"`
+	KeyPrefix     string `json:"keyPrefix,omitempty"`
 }
 
 func CreateConfig() *Config {
@@ -24,11 +25,17 @@ type ActivityTracker struct {
 	redisAddr     string
 	redisPassword string
 	redisUser     string
+	keyPrefix     string
 }
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	if config.RedisAddr == "" {
 		return nil, fmt.Errorf("redisAddr cannot be empty")
+	}
+
+	keyPrefix := config.KeyPrefix
+	if keyPrefix == "" {
+		keyPrefix = "sandbox:middleware:"
 	}
 
 	return &ActivityTracker{
@@ -37,12 +44,13 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		redisAddr:     config.RedisAddr,
 		redisPassword: config.RedisPassword,
 		redisUser:     config.RedisUser,
+		keyPrefix:     keyPrefix,
 	}, nil
 }
 
 func (m *ActivityTracker) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	host, port := getHostPort(req)
-	key := fmt.Sprintf("sandbox:middleware:%s:%s", host, port)
+	key := fmt.Sprintf("%s%s:%s", m.keyPrefix, host, port)
 	val := fmt.Sprintf("%d", time.Now().Unix())
 
 	go func() {

@@ -8,3 +8,4 @@ summary: A Traefik middleware plugin that logs request activity to Redis.
 testData:
   redisAddr: "localhost:6379"
   redisPassword: ""
+  keyPrefix: "test:prefix:"
